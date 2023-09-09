@@ -60,14 +60,15 @@ class elements:
             f'https://fantasy.premierleague.com/api/element-summary/{id}/')
         raw = json.loads(r.content)
 
-        # ELEMENT FIXTURES
+        # ELEMENT REMAIN FIXTURES
         self.fixtures = pd.DataFrame(raw['fixtures'])
-        convert_dict = {'id': str, 'code': str, 'team_h': str, 'team_a': str}
+        convert_dict = {'id': str, 'code': str, 'team_h': str, 'team_a': str, 'event': str}
         self.fixtures = self.fixtures.astype(convert_dict)
 
         # ELEMENT HISTORY
         self.history = pd.DataFrame(raw['history'])
-        convert_dict = {'element': str, 'fixture': str, 'opponent_team': str}
+        dtypes = pd.read_csv('./dtypes/element_history_dtypes.csv')
+        convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
         self.history = self.history.astype(convert_dict)
 
         # ELEMENT PAST SEASON
