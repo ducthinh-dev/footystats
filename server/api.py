@@ -11,7 +11,9 @@ class static:
 
     def get_events(self, is_finished=False, is_current=False, is_next=False):
         events = pd.DataFrame(self.data['events'])
-        events['id'] = events['id'].astype(str)
+        dtypes = pd.read_csv('./dtypes/events_dtypes.csv')
+        convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
+        events = events.astype(convert_dict)
         if is_finished:
             return events.loc[events['finished']]
         if is_current:
@@ -28,8 +30,9 @@ class static:
 
     def get_elements_summary(self):
         elements = pd.DataFrame(self.data['elements'])
-        convert_dict = {'id': str, 'code': str, 'element_type': str,
-                        'team': str, 'team_code': str, 'selected_by_percent': float}
+        csv_file = pd.read_csv('./dtypes/elements_dtypes.csv')
+        csv_file.drop(columns=['Unnamed: 2'], inplace=True)
+        convert_dict = csv_file.set_index('columns')['dtype 0'].to_dict()
         elements = elements.astype(convert_dict)
         elements['now_cost'] = elements['now_cost'] * 0.1
         return elements
@@ -39,10 +42,10 @@ class fixtures:
     def __init__(self):
         r = requests.get('https://fantasy.premierleague.com/api/fixtures/')
         self.fixtures = pd.DataFrame(json.loads(r.content))
-        self.fixtures['event'].fillna(0, inplace=True)
-        self.fixtures['event'] = self.fixtures['event'].astype(str)
-        self.fixtures['team_a'] = self.fixtures['team_a'].astype(str)
-        self.fixtures['team_h'] = self.fixtures['team_h'].astype(str)
+        self.fixtures.fillna('0', inplace=True)
+        dtypes = pd.read_csv('./dtypes/fixtures_dtypes.csv')
+        convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
+        self.fixtures = self.fixtures.astype(convert_dict)
 
     def get_fixtures(self, is_finished=True):
         if is_finished:
@@ -56,12 +59,18 @@ class elements:
         r = requests.get(
             f'https://fantasy.premierleague.com/api/element-summary/{id}/')
         raw = json.loads(r.content)
+
+        # ELEMENT FIXTURES
         self.fixtures = pd.DataFrame(raw['fixtures'])
         convert_dict = {'id': str, 'code': str, 'team_h': str, 'team_a': str}
         self.fixtures = self.fixtures.astype(convert_dict)
+
+        # ELEMENT HISTORY
         self.history = pd.DataFrame(raw['history'])
         convert_dict = {'element': str, 'fixture': str, 'opponent_team': str}
         self.history = self.history.astype(convert_dict)
+
+        # ELEMENT PAST SEASON
         self.past_seasons = pd.DataFrame(raw['history_past'])
 
 
