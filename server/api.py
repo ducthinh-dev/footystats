@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 
-class static:
+class static():
     def __init__(self):
         r = requests.get(
             'https://fantasy.premierleague.com/api/bootstrap-static/')
@@ -38,7 +38,7 @@ class static:
         return elements
 
 
-class fixtures:
+class fixtures():
     def __init__(self):
         r = requests.get('https://fantasy.premierleague.com/api/fixtures/')
         self.fixtures = pd.DataFrame(json.loads(r.content))
@@ -54,7 +54,7 @@ class fixtures:
             return self.fixtures.loc[self.fixtures['finished'] == False]
 
 
-class elements:
+class elements():
     def __init__(self, id=1):
         r = requests.get(
             f'https://fantasy.premierleague.com/api/element-summary/{id}/')
@@ -75,7 +75,7 @@ class elements:
         self.past_seasons = pd.DataFrame(raw['history_past'])
 
 
-class gameweek:
+class gameweek():
     def __init__(self, id=1):
         r = requests.get(
             f'https://fantasy.premierleague.com/api/event/{id}/live/')
