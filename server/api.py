@@ -87,3 +87,6 @@ class gameweek:
             stats_list.append(player['stats'])
         self.stats = pd.DataFrame(stats_list)
         self.stats.insert(0, 'id', id_list)
+        dtypes = pd.read_csv('./dtypes/gameweek_dtypes.csv')
+        convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
+        self.stats = self.stats.astype(convert_dict)
