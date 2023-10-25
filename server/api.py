@@ -34,7 +34,7 @@ class static():
         csv_file.drop(columns=['Unnamed: 2'], inplace=True)
         convert_dict = csv_file.set_index('columns')['dtype 0'].to_dict()
         elements = elements.astype(convert_dict)
-        elements['now_cost'] = elements['now_cost'] * 0.1
+        # elements['now_cost'] = elements['now_cost'] * 0.1
         return elements
 
 
