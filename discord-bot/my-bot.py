@@ -2,6 +2,12 @@ import discord
 import os
 from dotenv import load_dotenv
 
+import sys
+sys.path.append(r'D:\project\footystats')
+from server.api import static
+
+from datetime import datetime
+
 load_dotenv()
 
 intents = discord.Intents.default()
@@ -18,7 +24,9 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('$hello'):
-        await message.channel.send('Hello!')
+    if message.content.startswith('$gw1'):
+        live = static()
+        events = live.get_events()
+        await message.channel.send(f'Deadline time: {datetime.fromisoformat(events.iloc[0][2]).date()}')
 
 client.run(os.environ.get('TOKEN'))

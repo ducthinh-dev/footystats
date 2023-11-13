@@ -11,7 +11,8 @@ class static():
 
     def get_events(self, is_finished=False, is_current=False, is_next=False):
         events = pd.DataFrame(self.data['events'])
-        dtypes = pd.read_csv('./dtypes/events_dtypes.csv')
+        dtypes = pd.read_csv(
+            r'D:\project\footystats\server\dtypes\events_dtypes.csv')
         convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
         events = events.astype(convert_dict)
         if is_finished:
@@ -30,7 +31,8 @@ class static():
 
     def get_elements_summary(self):
         elements = pd.DataFrame(self.data['elements'])
-        csv_file = pd.read_csv('./dtypes/elements_dtypes.csv')
+        csv_file = pd.read_csv(
+            r'D:\project\footystats\server\dtypes\elements_dtypes.csv')
         csv_file.drop(columns=['Unnamed: 2'], inplace=True)
         convert_dict = csv_file.set_index('columns')['dtype 0'].to_dict()
         elements = elements.astype(convert_dict)
@@ -43,7 +45,8 @@ class fixtures():
         r = requests.get('https://fantasy.premierleague.com/api/fixtures/')
         self.fixtures = pd.DataFrame(json.loads(r.content))
         self.fixtures.fillna('0', inplace=True)
-        dtypes = pd.read_csv('./dtypes/fixtures_dtypes.csv')
+        dtypes = pd.read_csv(
+            r'D:\project\footystats\server\dtypes\fixtures_dtypes.csv')
         convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
         self.fixtures = self.fixtures.astype(convert_dict)
 
@@ -62,12 +65,14 @@ class elements():
 
         # ELEMENT REMAIN FIXTURES
         self.fixtures = pd.DataFrame(raw['fixtures'])
-        convert_dict = {'id': str, 'code': str, 'team_h': str, 'team_a': str, 'event': str}
+        convert_dict = {'id': str, 'code': str,
+                        'team_h': str, 'team_a': str, 'event': str}
         self.fixtures = self.fixtures.astype(convert_dict)
 
         # ELEMENT HISTORY
         self.history = pd.DataFrame(raw['history'])
-        dtypes = pd.read_csv('./dtypes/element_history_dtypes.csv')
+        dtypes = pd.read_csv(
+            r'D:\project\footystats\server\dtypes\element_history_dtypes.csv')
         convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
         self.history = self.history.astype(convert_dict)
 
@@ -87,6 +92,7 @@ class gameweek():
             stats_list.append(player['stats'])
         self.stats = pd.DataFrame(stats_list)
         self.stats.insert(0, 'id', id_list)
-        dtypes = pd.read_csv('./dtypes/gameweek_dtypes.csv')
+        dtypes = pd.read_csv(
+            r'D:\project\footystats\server\dtypes\gameweek_dtypes.csv')
         convert_dict = dtypes.set_index('Unnamed: 0')['0'].to_dict()
         self.stats = self.stats.astype(convert_dict)
