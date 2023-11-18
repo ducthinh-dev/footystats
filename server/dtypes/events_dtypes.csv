@@ -1,5 +1,5 @@
 ,0
-id,object
+id,string
 name,object
 deadline_time,object
 average_entry_score,int64
