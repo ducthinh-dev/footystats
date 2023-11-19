@@ -1,18 +1,20 @@
-def setup(database,host='localhost',user='root'):
+def setup():
+    import os
+    from dotenv import load_dotenv
     import sqlalchemy as sa
     import mysql.connector
-    import getpass
     
-    HOST = host
-    USER = user
-    DATABASE = database
-    PASSWORD = getpass.getpass(prompt='input password: ')
+    load_dotenv()
+    HOST = os.environ.get('HOST')
+    DATABASE = os.environ.get('DATABASE')
+    DUSERNAME = os.environ.get('DUSERNAME')
+    DPASSWORD = os.environ.get('DPASSWORD')
 
     def getconn():
         conn = mysql.connector.connect(
             host=HOST,
-            user=USER,
-            password=PASSWORD,
+            user=DUSERNAME,
+            password=DPASSWORD,
             database=DATABASE
         )
         return conn

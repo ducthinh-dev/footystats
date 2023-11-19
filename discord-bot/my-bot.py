@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 import sys
 sys.path.append(r'D:\project\footystats')
 from server.api import static
+from server.setup import setup
 
 load_dotenv()
+db_conn = setup()
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -29,7 +31,12 @@ async def on_message(message):
         live = static()
         events = live.get_events()
         gwid = message.content[3:]
-        deadline = datetime.fromisoformat(events.iloc[int(gwid)-1][2]).strftime('%I:%M%p %b %d %Y')
-        await message.channel.send(f'Deadline time for gameweek {gwid}: {deadline}.')
+        if int(gwid) > 38:
+            await message.channel.send(f'Gameweek {gwid} is not existed!.')
+        else:
+            deadline = datetime.fromisoformat(events.iloc[int(gwid)-1][2]).strftime('%I:%M%p %b %d %Y')
+            await message.channel.send(f'Deadline time for gameweek {gwid}: {deadline}.')
+    
+    
 
 client.run(os.environ.get('TOKEN'))
