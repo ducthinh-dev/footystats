@@ -1,27 +1,51 @@
 import pandas as pd
 from datetime import datetime, timedelta
 from api import static
+from setup import setup
+import sqlalchemy as sa
+
+
+def get_last_status(engine):
+    query = sa.text("select * from elements_summary;")
+    with engine.begin() as conn:
+        elements = pd.read_sql(query, con=conn)
+    return elements
+
+
+def get_live_status():
+    live_status = static()
+    elements = live_status.get_elements_summary()
+    return elements
+
 
 if __name__ == '__main__':
     today = datetime.now()
-    live_status = static()
+    engine_changes = setup()
+    engine_live = setup()
+    last_all = get_last_status(engine_changes)
+    live_all = get_live_status()
+    live = live_all.loc[live_all['cost_change_event'] != 0,['id', 'now_cost']]
+    last = last_all.loc[last_all['cost_change_event'] != 0,['id', 'now_cost']]
 
-    #GET LAST CHANGES
-    yesterday = today - timedelta(1)
-    last_changes = pd.read_excel(
-        rf'D:\project\footystats\changes\cost_changes_{yesterday.date()}.xlsx')
-    last_changes_code = last_changes['code'].tolist()
+    # GET CHANGES LIST
+    last_list = ['-'.join([str(i) for i in e])
+                 for e in last.to_numpy()]
+    live_list = ['-'.join([str(i) for i in e])
+                 for e in live.to_numpy()]
+    diff = list(set(live_list).difference(set(last_list)))
 
-    #GET NOW CHANGES
-    elements_df = live_status.get_elements_summary()
-    cost_columns = ['code', 'web_name', 'cost_change_event', 'cost_change_event_fall', 'cost_change_start',
-                    'cost_change_start_fall', 'now_cost']
-    now_changes = elements_df.loc[elements_df.cost_change_event !=
-                                       0, cost_columns]
-    now_changes['now_cost'] = now_changes['now_cost'].apply(lambda x: x*0.1)
-    now_changes_code = now_changes['code'].tolist()
+    # IF CHANGES AVAILABLE
+    # if len(diff) > 0:
+    changes_list = [int(e.split('-')[0]) for e in diff]
 
-    diff = list(set(now_changes_code).difference(set(last_changes_code)))
+    # GET DIFFERENCE
+    last = last_all.loc[last_all['id'].isin(changes_list), ['id', 'now_cost']]
+    live = live.loc[live['id'].isin(changes_list), ['id', 'now_cost']]
+    changes = last.join(live.set_index('id'), on='id',
+                        how='right', rsuffix='_live', lsuffix='_last')
+    changes['cost_difference'] = changes['now_cost_live'] - changes['now_cost_last']
+    changes['date_change'] = today.date().isoformat()
 
-    now_changes.to_excel(
-        rf'D:\project\footystats\changes\cost_changes_{today.date()}.xlsx', index=None)
+    # PUSH TO DB
+    changes.to_sql(name='elements_cost_changes', con=engine_changes, if_exists='append', index=False)
+    live_all.to_sql(name='elements_summary', con=engine_live, if_exists='replace', index=False)
