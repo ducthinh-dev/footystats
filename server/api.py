@@ -81,7 +81,7 @@ class elements():
 
 
 class gameweek():
-    def __init__(self, id=1):
+    def __init__(self, id):
         r = requests.get(
             f'https://fantasy.premierleague.com/api/event/{id}/live/')
         raw = json.loads(r.content)
